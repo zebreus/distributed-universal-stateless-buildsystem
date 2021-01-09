@@ -32,6 +32,7 @@ resourceb:
 ```
 
 A valid configuration, containg both resources could look like
+
 ```
 resources:
   - name: resourcea
@@ -39,7 +40,9 @@ resources:
   - name: resourceb
     path: /
 ```
+
 and result in this directory structure:
+
 ```
 /test/fileb.txt
 /resa/file.txt
@@ -47,6 +50,7 @@ and result in this directory structure:
 ```
 
 An example for an invalid configuration would be
+
 ```
 resources:
   - name: resourcea
@@ -54,6 +58,7 @@ resources:
   - name: resourceb
     path: /
 ```
+
 because the file at path /test/file.txt is defined by both resources.
 
 ### Resources
@@ -73,7 +78,7 @@ While the resource configuration defines the data structure, on which things are
 #### Background
 Tasks are defined so freely to allow the easy usage of custom sandboxing techniques, as some tasks can for example not be executed in a container, so you just write a configuration, to do sandboxing in a virtual machine.
 #### Thoughts
-I would probably really like it, if the task just sets up the environment and gets the ball rolling, and the actual task is part of the resource configuration
+I would probably really like it, if the task just sets up the environment and gets the ball rolling, and the actual task is part of the resource configuration. The more I think about this concept, the more I like it. Basically the task should just be the way the resource configuration is executed and the resource configuration should contain a script with the actual work
 
 ### Files configuration
 The files configuration of a resource specifies, which files are actually part of the resource
@@ -81,5 +86,46 @@ The files configuration of a resource specifies, which files are actually part o
 ## configuration file format
 
 The configuration file is a yaml file, 
+Here I will describe the keys in the current format
 
-### 
+### `resources: [resource]`
+Resources contains all resources, that are invovled in this configuration.
+
+### `resource`
+A resource consists of a name, a resource confifiguration, a output configuration and a task
+
+#### `resource.name: string`
+The name this resource will be referenced by.
+
+#### `resource.resources: [configurationEntry]`
+The resource configuration is an array of configuration entries. The resources defined by the configuration entries will be combined under one common root. If there are no configurationEntrys, this resource is a primary resource.
+
+#### `resource.files: [fileEntry]`
+The output configuration consists of a list of file entries, that are part of this resource. The files defined by the fileEntrys make up the resource. If this value is not specified, every file is part of this resource. If this value is specified and left empty, no files are part of this resource
+
+#### `resource.task: [task]`
+The task that has to be executed, to produce this resource.
+
+### `configurationEntry`
+A configurationEntry is a reference to a resource.
+
+#### `configurationEntry.name: string`
+The name of the referenced resource. Has to be the resource.name of a resource.
+
+#### `configurationEntry.path: string`
+All files of the referenced resource will be placed under this path. Defaults to / if left empty or not specified.
+
+### `fileEntry`
+A file entry defines a file, that will be part of the resource.
+
+#### `fileEntry.path: string`
+The path of the file, this fileEntry specifies. The file has to exist, after the task was executed.
+
+#### `task`
+The task that will be executed
+
+#### `task.environment: undefined`
+I still have to deceide how this will be structured. It could be as simple, as a path to a executable, or a real configuration...
+
+#### `task.*: misc`
+In the current thoughts.yml the idea  is, that whatever is defined in `task.environment` has some kind of access to every other key in task.
