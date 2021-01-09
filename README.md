@@ -121,6 +121,9 @@ A file entry defines a file, that will be part of the resource.
 #### `fileEntry.path: string`
 The path of the file, this fileEntry specifies. The file has to exist, after the task was executed.
 
+#### `fileEntry.name: string`
+The name/path of the file in the resource.
+
 #### `task`
 The task that will be executed
 
