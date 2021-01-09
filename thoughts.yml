@@ -1,0 +1,64 @@
+---
+# Resources are the inputs, they are versioned
+resources:
+  - name: git-repo-1
+    type: git
+    source: github.com/repo1
+  - name: git-repo-2
+    type: git
+    source: github.com/repo2
+  - name: build-image
+    type: dockerhub
+    source: dockerhub.com/buildimage
+  - name: some-weird-dep
+    type: file
+    source: https://filehost.com/file.tar
+  - name: build-hostconfig
+    type: git
+    source: https://github.org/buildhostconfig
+
+secondary:
+  - name: host
+    resources:
+      - name: build-hostconfig
+        path: /
+    files:
+      - name: host
+        path: /host
+
+  - name: host2
+    files:
+      - name: host
+        path: /host
+
+  - name: executable
+    # The resource configuration results in a directory structure
+    resources:
+      - name: build-image
+        path: /
+      - name: git-repo-1
+        path: /build/
+      - name: main.o
+        path: /build/
+      - name: host
+    # The contains configuration specifies, which files after the job are part of this resource
+    contains:
+      - name: executable
+        path: /build/executable
+    # The task configuration specifies what shall be done
+    # In the environment section, you specify how the resources are interpreted. The default should probably be as the rootfs of a docker container
+    # Every other value here is visible to the environment section
+    task:
+      environment: *containeronhost
+      commands:
+        - cd build
+        - g++ main.o -o executable
+  - name: main.o
+    files:
+      - name: main.o
+        path: /build/main.o
+    resources:
+      - name: build-image
+        path: /
+      - name: git-repo-1
+        path: /build/
