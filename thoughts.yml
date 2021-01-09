@@ -21,6 +21,13 @@ resources:
     task:
       environment: *clonegit
       source: https://github.com/buildhostconfig
+  - name: commandres
+    task:
+      environment: *inlinefile
+      path: file.txt
+      content: >
+        #!/bin/bash
+        dosomething
   - name: executable
     # The resource configuration results in a directory structure
     resources:
