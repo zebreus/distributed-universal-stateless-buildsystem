@@ -124,8 +124,12 @@ The path of the file, this fileEntry specifies. The file has to exist, after the
 #### `task`
 The task that will be executed
 
-#### `task.environment: undefined`
-I still have to deceide how this will be structured. It could be as simple, as a path to a executable, or a real configuration...
+#### `task.environment`
+I still have to deceide how this will be structured. It could be as simple, as a path to a executable, or a real configuration.
+For now this only contains a command, that will be executed on host. The
+
+#### `task.environment.command: string`
+A command that will be executed. The command will be executed in a directory prepared with a `resource.yml` file containining only the yaml configuration of the current resource, a `res` directory containing the prepared resource configuration and in future maybe a file containing all resource configurations. This is a hacky prototype solution and will probably be replaced in the future
 
 #### `task.*: misc`
 In the current thoughts.yml the idea  is, that whatever is defined in `task.environment` has some kind of access to every other key in task.
