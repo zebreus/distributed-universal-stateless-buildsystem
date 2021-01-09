@@ -1,5 +1,7 @@
 # distributed universal stateless build system configuration documentation
 
+Currently this is just a collection of thoughts, full of inconsistencies and grammatical errors. Everything can and probably will change
+
 ## goals
 The goal of this project is to create a stateless universal distributed build system. What that means is specified below
 ### distributed
@@ -54,6 +56,12 @@ resources:
 ```
 because the file at path /test/file.txt is defined by both resources.
 
+### Resources
+A resource consists of three main parts
+- A resource configuration ; the input
+- A output configuration ; the output
+- A task ; how to produce the output from the input
+
 ### Primary and secondary resources
 A primary resource is a resource, that is fetched from outside the build system. This could be for example a git repository or a container image. A secondary resource on the other side is made by the build system, and derived from primary resources. The version of a primary resource comes from an external source, the version of a secondary resource is defined by the primary resources, that it is based on. Technically, there will probably be no distincition between primary and secondary resources.
 
@@ -64,7 +72,11 @@ Resource type could state, how to get a primary resource. I am not sure wheter t
 While the resource configuration defines the data structure, on which things are done, the task specifies what is done. At the current stage, the plan is to let this be quite loosly defined and basically boil down to execute a command on the host computer. So it could be possible to do quite lowlevel and absolutly not stateless things, like compiling directly on the host. While this is possible, it is not how it is intended to be done. There will be template task configurations, that for example, start a container with the resource configuration as the rootfs and execute a custom command in the container. It is also planned, to create a template, that starts a container in a virtual machine, so you can even define things like cpu architecture in the configuration.
 #### Background
 Tasks are defined so freely to allow the easy usage of custom sandboxing techniques, as some tasks can for example not be executed in a container, so you just write a configuration, to do sandboxing in a virtual machine.
+#### Thoughts
+I would probably really like it, if the task just sets up the environment and gets the ball rolling, and the actual task is part of the resource configuration
 
+### Files configuration
+The files configuration of a resource specifies, which files are actually part of the resource
 
 ## configuration file format
 
