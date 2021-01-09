@@ -2,22 +2,25 @@
 # Resources are the inputs, they are versioned
 resources:
   - name: git-repo-1
-    type: git
-    source: github.com/repo1
+    task:
+      environment: *clonegit
+      source: https://github.com/repo1
   - name: git-repo-2
-    type: git
-    source: github.com/repo2
+    task:
+      environment: *clonegit
+      source: https://github.com/repo2
   - name: build-image
-    type: dockerhub
-    source: dockerhub.com/buildimage
+    task:
+      environment: *downloadcontainer
+      source: user/buildimage:latest
   - name: some-weird-dep
-    type: file
-    source: https://filehost.com/file.tar
+    task:
+      environment: *getfile
+      source: https://filehost.com/file.tar
   - name: build-hostconfig
-    type: git
-    source: https://github.org/buildhostconfig
-
-secondary:
+    task:
+      environment: *clonegit
+      source: https://github.com/buildhostconfig
   - name: executable
     # The resource configuration results in a directory structure
     resources:
