@@ -1,3 +1,13 @@
+environment: &clonegit
+  command: sh scripts/clonegit.sh
+environment: &downloadcontainer
+  command: sh scripts/downloadcontainer.sh
+environment: &getfile
+  command: sh scripts/getfile.sh
+environment: &inlinefile
+  command: sh scripts/inlinefile.sh
+environment: &containeronhost
+  command: sh scripts/containeronhost.sh
 ---
 # Resources are the inputs, they are versioned
 resources:

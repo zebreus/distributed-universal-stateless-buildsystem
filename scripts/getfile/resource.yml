@@ -1,0 +1,5 @@
+name: file-resource
+task:
+  environment:
+    command: getfile.sh
+  source: https://raw.githubusercontent.com/github/platform-samples/master/scripts/git-find-stale-branches

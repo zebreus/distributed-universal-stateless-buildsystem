@@ -1,0 +1,5 @@
+name: run-container
+task:
+  environment:
+    command: containeronhost.sh
+  command: echo "Hello world"

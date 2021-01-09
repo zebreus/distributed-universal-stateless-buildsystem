@@ -1,0 +1,8 @@
+name: commandres
+task:
+  environment:
+    command: inlinefile.sh
+  path: file.sh
+  content: |
+    #!/bin/bash
+    echo "Hello world"

@@ -1,0 +1,5 @@
+name: git-repo-2
+task:
+  environment:
+    command: gitclone.sh
+  source: https://github.com/github/platform-samples.git
