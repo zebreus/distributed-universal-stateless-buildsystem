@@ -110,12 +110,17 @@ The build system itself could store your secrets and a hash of the configuration
 The files configuration of a resource specifies, which files are actually part of the resource
 
 ### State in the build system
-The build system probably needs some kind of state and persistent storage to store cof
+The build system probably needs some kind of state and persistent storage to store stuff. I want the build system to be able to run (in default mode) without some kind of daemon, so the state needs to be persited. Currently I think it would be best to create a `.dusb` directory next to the configuration file with everything in it.
+#### Resource versions
+It is probably needed to store resource versions somewhere
+#### Information about resources and resource versions
+They should probably stored somewhere around the configuration file. For now this will be stored in a .dusb directory alongside the project configuration as a file and be called the project state file.
+#### Information about build failures and stuff
 
 
 ## configuration file format
 
-The configuration file is a yaml file, 
+The configuration file is a yaml file.
 Here I will describe the keys in the current format
 
 ### `resources: [resource]`
@@ -166,3 +171,7 @@ A command that will be executed. The command will be executed in a directory pre
 
 #### `task.*: misc`
 In the current thoughts.yml the idea  is, that whatever is defined in `task.environment` has some kind of access to every other key in task.
+
+## project state file
+A project state file is a yaml file, that contains the state of the project.
+I will probably define it as I implement a first prototype.
