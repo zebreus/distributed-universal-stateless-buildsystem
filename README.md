@@ -73,15 +73,45 @@ A primary resource is a resource, that is fetched from outside the build system.
 ### Resource types
 Resource type could state, how to get a primary resource. I am not sure wheter this is a good idea, or if there rather should be instructions, that specifiy how to get the resource content..
 
+### Version id
+Every version of a resource has an id, that is unique between all versions of that resource. The version id can only be determined after the creation finished.
+
+### Input id
+Every version of a resource that takes inputs has an id that is solely based on the input version ids and its resource id.
+
+### Resource id
+Every resource has an id, that should be unique from all other resource ids. A resource with the same id always has the same inputs and will always produce the same output from the same inputs. The resource id could be a hash of the resource entry. For now it is assumed, that this is true and every resource is reproducible.
+#### Problems
+A resource will probably produce different output, while its resource entry stays unchanged, if the external task script changes.
+##### Solution
+For now I just pretend, that this problem does not exist, as it is probably impossible to solve, because it boils down to requiring 100% reproducible builds. Even it is managed to provide the exact same environment every time, there could still be race conditions or random numbers or time messing up the reproducibility.
+What could be done is to create some mechanism to determine, whether a resource is probably reproducible.
+Also it could be required to supply all needed scripts in the input resources.
+
 ### Tasks
 While the resource configuration defines the data structure, on which things are done, the task specifies what is done. At the current stage, the plan is to let this be quite loosly defined and basically boil down to execute a command on the host computer. So it could be possible to do quite lowlevel and absolutly not stateless things, like compiling directly on the host. While this is possible, it is not how it is intended to be done. There will be template task configurations, that for example, start a container with the resource configuration as the rootfs and execute a custom command in the container. It is also planned, to create a template, that starts a container in a virtual machine, so you can even define things like cpu architecture in the configuration.
+The task of a resource could consist of not only a build script, which is normally executed, but also a script, that is executed to generate the hash of the result.
+
 #### Background
 Tasks are defined so freely to allow the easy usage of custom sandboxing techniques, as some tasks can for example not be executed in a container, so you just write a configuration, to do sandboxing in a virtual machine.
 #### Thoughts
 I would probably really like it, if the task just sets up the environment and gets the ball rolling, and the actual task is part of the resource configuration. The more I think about this concept, the more I like it. Basically the task should just be the way the resource configuration is executed and the resource configuration should contain a script with the actual work
 
+### Task environment
+If a taskscript is executed it gets all the data over its prepared workingdirectory.
+Currently the working directory contains a `res` directory with the prepared resource configuration. It also contains a resource.yml file with the configuration of the resource.
+#### Thoughts
+Maybe the task scripts should be able to call the build system to get additional information
+
+### Secrets
+The build system itself could store your secrets and a hash of the configuration they belong to for you and automatically apply them only to the correct configuration.
+
 ### Files configuration
 The files configuration of a resource specifies, which files are actually part of the resource
+
+### State in the build system
+The build system probably needs some kind of state and persistent storage to store cof
+
 
 ## configuration file format
 
