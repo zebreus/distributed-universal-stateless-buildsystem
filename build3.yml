@@ -1,0 +1,88 @@
+usenextbuild: &usenextbuild
+  build.yml:
+    command: |
+      #!/bin/sh
+      set eux
+      THISBUILD=$(yq -r '.thisbuild' /config.yml)
+      if test "$THISBUILD" != "true"
+        mv nextbuild.yml > build.yml
+      fi
+  config.yml:
+    thisbuild: true
+  output.yml:
+    - build.yml
+
+getgit: &getgit
+  resources:
+  - <<: *usenextbuild
+  nextbuild.yml:
+    command: sh getgit.sh
+  getgit.sh: |
+      #!/bin/sh
+      set eux
+      URL=$(yq -r '.source' /config.yml)
+      git clone --recursive "$URL" $(pwd)
+  output.yml:
+    - /build.yml
+    - /getgit.sh
+
+getcontainer: &getcontainer
+  resources:
+  - <<: *usenextbuild
+  nextbuild.yml:
+    command: sh getcontainer.sh
+  getcontainer.sh: |
+    #!/bin/sh
+    set eux
+    CONTAINER=$(yq -r '.source' config.yml )
+    docker pull "$CONTAINER"
+    docker save "$CONTAINER" | undocker -o $(pwd)
+  output.yml:
+    - /build.yml
+    - /getcontainer.sh
+
+runincontainer: &runincontainer
+  resources:
+  - resources:
+    - <<: *getgit
+    config.yml:
+      source: https://github.com/containerrepo.git
+    output.yml:
+    - everything but config.yml and build.yml
+    path: /
+  - <<: *usenextbuild
+  nextbuild.yml:
+    command: sh runincontainer.sh
+
+
+resources:
+- name: source-repo
+  resources:
+    - <<: *getgit
+  config.yml:
+    source: https://github.com/mysourcerepo
+- name: mycontainer
+  resources:
+    - <<: *getcontainer
+  config.yml:
+    source: archlinux:base-devel
+- name: main.o
+  resources:
+  - name: mycontainer
+  - <<: *runincontainer
+  - name: source-repo
+    path: /src/
+  config.yml:
+    command: cd /src ; g++ -c main.cpp -o main.o
+  output.yaml:
+    - /src/main.o
+- name: executable
+  resources:
+  - name: mycontainer
+  - <<: *runincontainer
+  - name: main.o
+    path: /src
+  config.yml:
+    command: cd /src ; g++ main.o -o main
+  output.yaml:
+    - /src/main
