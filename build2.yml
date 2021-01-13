@@ -1,14 +1,22 @@
-?
-: &usenextbuild
+usenextbuild: &usenextbuild
   resources:
   - file: build.yml
-    content: |
-      #!/bin/sh
-      set eux
-      mv nextbuild.yml > build.yml
+    content:
+      command: |
+        #!/bin/sh
+        set eux
+        THISBUILD=$(yq -r '.thisbuild' /config.yml)
+        if test "$THISBUILD" != "true"
+          mv nextbuild.yml > build.yml
+        fi
+  - file: config.yml
+    content:
+      thisbuild: true
+  - file: output.yml
+    content:
+    -  build.yml
 
-?
-: &getgit
+getgit: &getgit
   resources:
   - file: getgit.sh
     content: |
@@ -16,13 +24,16 @@
       set eux
       URL=$(yq -r '.source' /config.yml)
       git clone --recursive "$URL" $(pwd)
-  - <<: &usenextbuild
+  - <<: *usenextbuild
   - file: nextbuild.yml
     content:
       command: sh getgit.sh
+  - file: output.yml
+    content:
+    - /build.yml
+    - /getgit.sh
 
-?
-: &getcontainer
+getcontainer: &getcontainer
   resources:
   - file: getcontainer.sh
     content: |
@@ -31,13 +42,16 @@
       CONTAINER=$(yq -r '.source' config.yml )
       docker pull "$CONTAINER"
       docker save "$CONTAINER" | undocker -o $(pwd)
-  - <<: &usenextbuild
+  - <<: *usenextbuild
   - file: nextbuild.yml
     content:
       command: sh getcontainer.sh
+  - file: output.yml
+    content:
+    - /build.yml
+    - /getcontainer.sh
 
-?
-: &runincontainer
+runincontainer: &runincontainer
   resources:
   - resources:
     - <<: *getgit
@@ -48,17 +62,16 @@
       content:
       - everything but config.yml and build.yml
     path: /
-  - <<: &usenextbuild
+  - <<: *usenextbuild
   - file: nextbuild.yml
     content:
       command: sh runincontainer.sh
 
----
 
 resources:
 - name: source-repo
   resources:
-    - <<: *gittask
+    - <<: *getgit
     - file: config.yml
       content:
         source: https://github.com/mysourcerepo
@@ -77,7 +90,7 @@ resources:
   - file: config.yml
     content:
       command: cd /src ; g++ -c main.cpp -o main.o
-  - file: outputs.yaml
+  - file: output.yaml
     content:
       - /src/main.o
 - name: executable
@@ -89,6 +102,6 @@ resources:
   - file: config.yml
     content:
       command: cd /src ; g++ main.o -o main
-  - file: outputs.yaml
+  - file: output.yaml
     content:
       - /src/main
