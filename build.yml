@@ -4,11 +4,13 @@ resources:
       environment:
         command: sh scripts/clonegit.sh
       source: https://gist.github.com/ae2900ddab30ef7548da6188815ee68b.git
+
   - name: build-container
     task:
       environment:
         command: sh scripts/downloadcontainer.sh
       source: archlinux:base-devel
+
   - name: main.o
     resources:
     - name: source-repo
@@ -21,13 +23,17 @@ resources:
     task:
       environment:
         command: sh scripts/containeronhost.sh
-      command: g++ -c main.cpp -o main.o
+      command: cd /src ; g++ -c main.cpp -o main.o
+
   - name: executable
     resources:
     - name: main.o
       path: /src
     - name: build-container
       path: /
+    - file: config.yml
+      content:
+        var: dsfasdf
     files:
     - name: main
       path: /src/main

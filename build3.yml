@@ -56,16 +56,33 @@ runincontainer: &runincontainer
 
 
 resources:
+- name: gittask
+  resources:
+  - <<: *usenextbuild
+  nextbuild.yml:
+    command: sh getgit.sh
+  getgit.sh: |
+      #!/bin/sh
+      set eux
+      URL=$(yq -r '.source' /config.yml)
+      git clone --recursive "$URL" $(pwd)
+  output.yml:
+    - /build.yml
+    - /getgit.sh
+
+resources:
 - name: source-repo
   resources:
-    - <<: *getgit
+    - name: gittask
   config.yml:
     source: https://github.com/mysourcerepo
+
 - name: mycontainer
   resources:
     - <<: *getcontainer
   config.yml:
     source: archlinux:base-devel
+
 - name: main.o
   resources:
   - name: mycontainer
@@ -74,8 +91,12 @@ resources:
     path: /src/
   config.yml:
     command: cd /src ; g++ -c main.cpp -o main.o
-  output.yaml:
-    - /src/main.o
+  filelist.yml:
+    command: cat+regexp output.yml
+  output.yml:
+    - /
+    - !/src
+
 - name: executable
   resources:
   - name: mycontainer
