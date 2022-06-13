@@ -16,22 +16,22 @@ A framework in which to execute jobs.
 ## Ideas
 The build system has some concepts, I will describe some of them here.
 ### Resources
-A resource is a versioned set of files in a directory structure.
-### Resource configuration
-A resource configuration is a set of resources, each with a path, that is prefixed to each file of the resource. A resource configuration is valid if all files of all resources can be combined into one root.
+A resource is a versioned set of files in a directory structure. A version is basically a name that identifes a specific configuration of things.
+### Resource set
+A resource set is a set of input resources, each with a path, that is prefixed to each file of the input resource. A resource set is valid if all files of all input resources can be combined into one root.
 
-If you have the following resources
+If the following named resources already exist and contain the following files:
 
 ```
 resourcea:
   file.txt
 
 resourceb:
-  test/fileb.txt
+  test/file.txt
   file.txt
 ```
 
-A valid configuration, containg both resources could look like
+A valid configuration, containg both resources could look like 
 
 ```
 resources:
@@ -44,7 +44,7 @@ resources:
 and result in this directory structure:
 
 ```
-/test/fileb.txt
+/test/file.txt
 /resa/file.txt
 /file.txt
 ```
@@ -59,19 +59,37 @@ resources:
     path: /
 ```
 
-because the file at path /test/file.txt is defined by both resources.
+because the file at path /test/file.txt is defined by both input resources, so they cannot be combined.
 
 ### Resources
-A resource consists of three main parts
-- A resource configuration ; the input
-- A output configuration ; the output
-- A task ; how to produce the output from the input
+A resource is basically just a versioned and executed set of other resources.
 
 ### Primary and secondary resources
-A primary resource is a resource, that is fetched from outside the build system. This could be for example a git repository or a container image. A secondary resource on the other side is made by the build system, and derived from primary resources. The version of a primary resource comes from an external source, the version of a secondary resource is defined by the primary resources, that it is based on. Technically, there will probably be no distincition between primary and secondary resources.
+A secondary resource is reproducible, while a primary resource is not.
+A primary resource is usualy a resource, that is fetched from outside the build system or depends on external factors (and its input resources). This could be for example a git repository or a container image. A secondary resource is only from derived from the set of its input resources. It will always produce the same version with the same inputs. The version of a primary resource comes from an external source, the version of a secondary resource is defined only by it's input resources, that it is based on. Technically, there will be no distincition between primary and secondary resources. The terms are used to classify resource behaviour.
+#### Thoughts
+It could be a good idea, to specifically mark primary resources and to deny things that cause irreproducebility, like internet or time access to all secondary resources. Probably this is a really bad idea.
 
-### Resource types
-Resource type could state, how to get a primary resource. I am not sure wheter this is a good idea, or if there rather should be instructions, that specifiy how to get the resource content..
+### Resource
+A resource is a set of other resources, that can be merged and build to produce a version of this resource.
+It is the yaml code you write in your configuration file.
+
+### Version
+A version is the result of a resource produced with a specific set of versions of the input resources. For a secondary 
+
+### Ingredient
+When a resource is used as 
+
+### Ingredients
+The set of resources, that define a resource are called its ingredients.
+
+### Ingredient version
+A ingredient version is a version of a input resource
+
+### Input versions
+The input versions are a version of each resource of the inputs
+
+### Versions files
 
 ### Version id
 Every version of a resource has an id, that is unique between all versions of that resource. The version id can only be determined after the creation finished.
@@ -80,13 +98,16 @@ Every version of a resource has an id, that is unique between all versions of th
 Every version of a resource that takes inputs has an id that is solely based on the input version ids and its resource id.
 
 ### Resource id
-Every resource has an id, that should be unique from all other resource ids. A resource with the same id always has the same inputs and will always produce the same output from the same inputs. The resource id could be a hash of the resource entry. For now it is assumed, that this is true and every resource is reproducible.
+Every resource has an id, that should be unique from all other resource ids. A resource with the same id always has the same inputs and will always produce the same output from the same inputs. The resource id could be a hash of the resource entry. For now it is assumed, that this is true and every resource is reproducible. The same resource name always has to have the same resource id.
 #### Problems
 A resource will probably produce different output, while its resource entry stays unchanged, if the external task script changes.
 ##### Solution
 For now I just pretend, that this problem does not exist, as it is probably impossible to solve, because it boils down to requiring 100% reproducible builds. Even it is managed to provide the exact same environment every time, there could still be race conditions or random numbers or time messing up the reproducibility.
 What could be done is to create some mechanism to determine, whether a resource is probably reproducible.
 Also it could be required to supply all needed scripts in the input resources.
+
+### Resource name
+The resource name provides easy identification of a resource. Every resource with the same name has to have the same resource id.
 
 ### Tasks
 While the resource configuration defines the data structure, on which things are done, the task specifies what is done. At the current stage, the plan is to let this be quite loosly defined and basically boil down to execute a command on the host computer. So it could be possible to do quite lowlevel and absolutly not stateless things, like compiling directly on the host. While this is possible, it is not how it is intended to be done. There will be template task configurations, that for example, start a container with the resource configuration as the rootfs and execute a custom command in the container. It is also planned, to create a template, that starts a container in a virtual machine, so you can even define things like cpu architecture in the configuration.
